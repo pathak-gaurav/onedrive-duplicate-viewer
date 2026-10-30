@@ -9,6 +9,16 @@ It runs entirely on your machine as a small Python web server. No framework, no 
   <img src="docs/screenshot-light.png" alt="OneDrive Duplicate Viewer — duplicate groups beside a side-by-side copy comparison, with filterable stats and bulk review controls">
 </picture>
 
+## Features
+
+- **Duplicate groups** — files with identical checksums grouped together, sorted by recoverable space
+- **Two scan modes** — whole-drive scan, or targeted folder scan with a built-in OneDrive folder browser
+- **Side-by-side comparison** — real thumbnails, resolution, duration, modified dates, and paths for every copy
+- **Filter and sort** — by name, file type, size, and copy count; stale copies flagged when files change after a scan
+- **Bulk mark-extras** — keep oldest / newest / shortest path, or mark copies one by one
+- **Review before delete** — a confirmation dialog shows the exact keep and remove lists, then moves copies to the Recycle Bin
+- **Light and dark themes** — follows your system, with a responsive layout down to mobile widths
+
 ## "Wait, what does this actually do?"
 
 Nothing you couldn't do by hand — it just makes it pleasant. The viewer wraps two things:
