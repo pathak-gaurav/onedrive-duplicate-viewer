@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A local viewer that compares duplicate files in OneDrive side by side before you decide what to keep.">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#0e7566" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#151d1b" media="(prefers-color-scheme: dark)">
+  <title>OneDrive Duplicate Viewer</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/style.css">
+  <script type="module" src="/app.mjs"></script>
+</head>
+<body>
+  <header class="topbar"><div class="brandmark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.4" y="3.4" width="10.6" height="10.6" rx="2.8" stroke="currentColor" stroke-opacity=".55" stroke-width="1.9"/><rect x="10" y="10" width="10.6" height="10.6" rx="2.8" fill="currentColor"/><path d="m13.1 15.7 2 2 3.7-3.7" stroke="var(--accent)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="eyebrow">YOUR ONEDRIVE · LOCAL VIEWER</div><h1>Find the copies. Keep the memories.</h1></div><button id="reload" class="secondary">Rescan current view</button></header>
+  <main>
+    <nav class="view-tabs" role="tablist" aria-label="Duplicate tools"><button id="tab-all" role="tab" aria-selected="true" aria-controls="results-panel">All duplicates</button><button id="tab-folder" role="tab" aria-selected="false" aria-controls="results-panel" tabindex="-1">Folder scan</button></nav>
+    <section id="results-panel" role="tabpanel" aria-labelledby="tab-all">
+    <div class="intro"><p id="view-intro">Compare copies side by side before deciding what to keep.</p><span class="cloud-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.4 18.5a4.6 4.6 0 0 0 .5-9.2 6 6 0 0 0-11.7-1.4A4.7 4.7 0 0 0 6.6 18.5z"/></svg>Originals stay in OneDrive</span></div>
+    <section id="refresh-banner" class="refresh-banner" aria-label="Cloud refresh status" hidden><p id="refresh-message" role="status" aria-live="polite"></p><button id="retry-refresh" class="secondary" hidden>Retry fresh scan</button><button id="stop-refresh" class="secondary" hidden>Stop refresh</button></section>
+    <section id="folder-controls" class="folder-controls" aria-label="Scan a OneDrive folder" hidden>
+      <div class="folder-heading"><div><h2>Scan a specific folder</h2><p>Choose a OneDrive folder. Only that folder and its subfolders will be scanned.</p></div><button id="start-folder-scan" class="primary-button" disabled>Scan this folder</button></div>
+      <details id="folder-browser" open><summary>Choose folder</summary><div class="folder-location"><button id="folder-up" class="secondary" disabled>↑ Parent folder</button><button id="folder-root" class="text-button">OneDrive</button><span id="folder-location">Open a folder to select it</span></div><div id="folder-list" class="folder-list"></div></details>
+      <div class="folder-scan-status"><p id="folder-status" role="status" aria-live="polite">Choose a folder, then start a scan.</p><button id="cancel-folder-scan" class="secondary" hidden>Cancel scan</button></div>
+      <p id="folder-results-scope" class="folder-results-scope">No completed folder scan yet.</p>
+    </section>
+    <section class="stats" aria-label="Filtered results"><div><span>Matching groups</span><strong id="group-count">—</strong></div><div><span>Extra copies</span><strong id="extra-count">—</strong></div><div><span>Potential space to recover</span><strong id="savings">—</strong></div><div class="scan-info"><span>Scan updated</span><strong id="scanned-at">—</strong><small>Personal Vault excluded</small></div></section>
+    <form id="filters" class="filters" aria-label="Filter duplicate groups">
+      <label class="search">Search names or paths<input id="search" type="search" placeholder="Try a folder, filename, or extension…" autocomplete="off"></label>
+      <label>File type<select id="type"><option value="all">All files</option><option value="image">Images</option><option value="video">Videos</option><option value="document">Documents</option><option value="other">Other files</option></select></label>
+      <fieldset><legend>File size · MB</legend><div class="size-range"><input id="min" type="number" min="0" step="any" aria-label="Minimum file size in MB" placeholder="Min"><span>–</span><input id="max" type="number" min="0" step="any" aria-label="Maximum file size in MB" placeholder="Max"></div></fieldset>
+      <label>Copies<select id="copies"><option value="2">2 or more</option><option value="3">3 or more</option><option value="5">5 or more</option></select></label>
+      <label>Sort by<select id="sort"><option value="savings">Most space to recover</option><option value="size">Largest files</option><option value="copies">Most copies</option><option value="name">Filename A–Z</option></select></label>
+      <button id="reset-filters" type="button" class="text-button">Reset</button>
+    </form>
+    <section class="bulk-toolbar" aria-label="Bulk deletion">
+      <div class="bulk-summary"><strong id="bulk-count">No copies selected</strong><span id="bulk-scope">Selections stay marked across groups and filters in this tab.</span></div>
+      <div class="bulk-controls"><label>When marking extras, keep<select id="keep-rule"><option value="oldest">Oldest modified copy</option><option value="newest">Newest modified copy</option><option value="shortest">Copy with shortest path</option></select></label><button id="mark-page" class="secondary">Mark extras on this page</button><button id="mark-filtered" class="secondary">Mark extras in filtered results</button><button id="clear-selection" class="text-button" disabled>Clear selection</button><button id="review-bulk" class="danger-button" disabled>Review selected copies</button></div>
+    </section>
+    <p id="notice" class="notice" role="status" aria-live="polite"></p>
+    <div class="workspace">
+      <aside class="group-panel" aria-label="Duplicate groups"><div class="panel-heading"><h2>Duplicate groups</h2><span id="result-count"></span></div><div id="group-list" class="group-list"></div><div class="pagination"><button id="previous" class="secondary" aria-label="Previous page">←</button><span id="page-count"></span><button id="next" class="secondary" aria-label="Next page">→</button></div></aside>
+      <section id="comparison" class="comparison" aria-label="Compare copies"><div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="10.5" height="10.5" rx="2.8" stroke-opacity=".6"/><rect x="10" y="10" width="10.5" height="10.5" rx="2.8" fill="currentColor" stroke="none" fill-opacity=".18"/><path d="m13.2 15.7 2 2 3.6-3.7"/></svg></div><h2>Choose a group to compare</h2><p>Previews load only for the copies you open.</p></div></section>
+    </div>
+    </section>
+    <footer>Small OneDrive thumbnails use a little data; original files are never fetched by this viewer. Matching checksums identify candidates, not a full visual-quality assessment.</footer>
+  </main>
+</body>
+</html>

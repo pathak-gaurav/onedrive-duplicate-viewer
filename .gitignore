@@ -1,0 +1,17 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Viewer runtime + scan artifacts (contain session secrets and your file paths)
+viewer-runtime.json
+viewer-deletions.json
+last-scan.txt
+sample-scan.txt
+folder-scans/
+*.part
+*.log
+*.tmp
+
+# Tooling artifacts (local config, not codebase)
+.devin/
+.playwright-mcp/
